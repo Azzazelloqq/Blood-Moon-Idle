@@ -1,0 +1,14 @@
+﻿{
+  "name": "PeopleSpawnService",
+  "references": [
+    "ResourceLoader",
+    "TickHandler",
+    "DetectionService",
+    "Logger",
+    "CameraService",
+    "Runtime.Gameplay",
+    "LightDI",
+    "MVP",
+    "Disposable"
+  ]
+}

@@ -1,0 +1,19 @@
+﻿{
+  "name": "Core.Architecture.GameGlobalState.Factory",
+  "references": [
+    "Core.Architecture.GameGlobalState.Contract",
+    "GameGlobalState.States",
+    "LightDI",
+    "AddressablesGenerated",
+    "CameraService",
+    "Core.Architecture.CompositionRoots",
+    "Core.Architecture.Input",
+    "DayNightCycleService",
+    "GameConfig",
+    "MovementService",
+    "Runtime.Core.Architecture.UI",
+    "Runtime.Gameplay",
+    "Runtime.UI",
+    "TransformUtils"
+  ]
+}

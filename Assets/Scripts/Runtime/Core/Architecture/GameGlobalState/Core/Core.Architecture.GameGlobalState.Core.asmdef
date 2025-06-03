@@ -1,0 +1,19 @@
+{
+    "name": "Core.Architecture.GameGlobalState.Core",
+    "rootNamespace": "",
+    "references": [
+        "Core.Architecture.GameGlobalState.Contract"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "internalsVisibleTo": [
+        "Core.Architecture.GameGlobalState.Tests"
+    ]
+}

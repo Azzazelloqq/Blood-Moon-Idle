@@ -1,0 +1,18 @@
+{
+    "name": "GameGlobalState.Installer",
+    "references": [
+        "GUID:6fb8a69b855e442e9d5ae20197cbe34c",
+        "GUID:5889cdc968e64322aff20fd11abcfc7d",
+        "GUID:ae087cbec4f34c88ba8e0c5612c00f44",
+        "GUID:c9f76ac6b5b2484789d93f0d3960dc33"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

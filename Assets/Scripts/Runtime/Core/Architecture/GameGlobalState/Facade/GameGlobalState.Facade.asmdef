@@ -1,0 +1,19 @@
+﻿{
+    "name": "GameGlobalState.Facade",
+    "references": [
+        "GUID:6fb8a69b855e442e9d5ae20197cbe34c"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "internalsVisibleTo": [
+        "GameGlobalState.Installer",
+        "GameGlobalState.States"
+    ]
+}

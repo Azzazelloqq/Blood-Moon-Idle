@@ -1,0 +1,8 @@
+﻿{
+  "name": "MovementService",
+  "references": [
+    "GUID:21443193b9119fc458cebc6c25737dbb",
+    "GUID:e03d2d67472051a4e8982e8a5bebc561",
+    "TransformUtils"
+  ]
+}

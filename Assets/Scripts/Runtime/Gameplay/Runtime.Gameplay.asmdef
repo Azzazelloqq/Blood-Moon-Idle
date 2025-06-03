@@ -1,0 +1,29 @@
+{
+    "name": "Runtime.Gameplay",
+    "references": [
+        "GUID:e03d2d67472051a4e8982e8a5bebc561",
+        "GUID:c9f76ac6b5b2484789d93f0d3960dc33",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f",
+        "GUID:f3a29d15daa5e9345ab71de7276cd04b",
+        "GUID:21443193b9119fc458cebc6c25737dbb",
+        "GUID:1d9516e6f01b24c47a72364509e55a7c",
+        "GUID:3becf044f870402c8402ec7595f1b736",
+        "GUID:fc9472c09360a0e48b998a21fda85ee1",
+        "GUID:ab89f45f2c8144f38c2d26fa8f865941",
+        "GUID:772e7f396057415b92701eb4fe397e1b",
+        "GUID:d06476e50cf34f35947c4321c0805b96",
+        "GUID:aa1ba7f369e2e274fa36088d73b5ec1b",
+        "GUID:97555800cdd541889e5eb7528d3e9f9c",
+        "GUID:a649dfdd7ec849148a9a050cb8705d74",
+        "GUID:1f479669ac344197a28280f8705300a5"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

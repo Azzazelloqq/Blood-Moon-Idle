@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 603ee7ad200e68e4a81d0d12dd914800, type: 3}
+  m_Name: DayNightCycleRemoteConfigPage
+  m_EditorClassIdentifier: 
+  _dayDuration:
+    _hours: 0
+    _minutes: 0
+    _seconds: 30
+  _nightDuration:
+    _hours: 0
+    _minutes: 0
+    _seconds: 30
+  _lightingPeriods:
+  - _timeOfDay: 0
+    _temperature: 3500
+    _filter: {r: 1, g: 1, b: 1, a: 1}
+    _intensity: 0.5
+    _normalizedTimeStart: 0
+    _normalizedTimeEnd: 0.125
+  - _timeOfDay: 1
+    _temperature: 5500
+    _filter: {r: 1, g: 1, b: 1, a: 1}
+    _intensity: 1
+    _normalizedTimeStart: 0.125
+    _normalizedTimeEnd: 0.375
+  - _timeOfDay: 2
+    _temperature: 6446
+    _filter: {r: 1, g: 1, b: 1, a: 1}
+    _intensity: 1.2
+    _normalizedTimeStart: 0.375
+    _normalizedTimeEnd: 0.625
+  - _timeOfDay: 3
+    _temperature: 2457
+    _filter: {r: 1, g: 0.6, b: 0.3, a: 1}
+    _intensity: 0.7
+    _normalizedTimeStart: 0.625
+    _normalizedTimeEnd: 0.75
+  - _timeOfDay: 4
+    _temperature: 5506
+    _filter: {r: 0.3, g: 0.4, b: 0.8, a: 1}
+    _intensity: 0.2
+    _normalizedTimeStart: 0.75
+    _normalizedTimeEnd: 0.875
+  - _timeOfDay: 5
+    _temperature: 7731
+    _filter: {r: 0.2, g: 0.3, b: 0.6, a: 1}
+    _intensity: 0.1
+    _normalizedTimeStart: 0.875
+    _normalizedTimeEnd: 1
+  _autoStart: 1
