@@ -1,5 +1,99 @@
 {
   "dependencies": {
+    "com.azzazello.detectionservice": {
+      "version": "https://github.com/Azzazelloqq/Detection-service.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "b00e92e2fccec6407827bd0a1d6452f59c05fd69"
+    },
+    "com.azzazello.disposable": {
+      "version": "https://github.com/Azzazelloqq/Disposable.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "26cd27d6ecbed7c3e44ca38793a15a1c158b14e9"
+    },
+    "com.azzazello.lightdi": {
+      "version": "https://github.com/Azzazelloqq/LightDI.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "f7d02a9b8a78d463eb427e7933fb4e1534a498ba"
+    },
+    "com.azzazello.localsavesystem": {
+      "version": "https://github.com/Azzazelloqq/LocalSave.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "7e8123e31fbc09f9058904d6b3180131d6182e7a"
+    },
+    "com.azzazello.logger": {
+      "version": "https://github.com/Azzazelloqq/InGameLogger.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "2d4dbfd7512b1b29d3ca7c3e43298a3f236a0489"
+    },
+    "com.azzazello.mvp": {
+      "version": "https://github.com/Azzazelloqq/MVP-pattern.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.azzazello.disposable": "https://github.com/Azzazelloqq/Disposable.git#main"
+      },
+      "hash": "e5dfd58c109426fe491e90f23a90f85dbfebb972"
+    },
+    "com.azzazello.mvvm": {
+      "version": "https://github.com/Azzazelloqq/MVVM.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.azzazello.disposable": "https://github.com/Azzazelloqq/Disposable.git#v1.0.1"
+      },
+      "hash": "8260dc00a96bcd8435899eb4999bf4a9e349c828"
+    },
+    "com.azzazello.resourceloader": {
+      "version": "https://github.com/Azzazelloqq/ResourceLoader.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.addressables": "1.21.20"
+      },
+      "hash": "8100bd189b6a5617dc6c2a2840129f7abf39f360"
+    },
+    "com.azzazello.sceneswitcher": {
+      "version": "https://github.com/Azzazelloqq/SceneSwitcher.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.addressables": "1.21.20"
+      },
+      "hash": "8d55169e7a0c62715521d172765524e2ef47c702"
+    },
+    "com.azzazello.tickhandler": {
+      "version": "https://github.com/Azzazelloqq/TickHandler.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "a9baf356016accb677741977ce0ae3ea399de2e6"
+    },
+    "com.unity.addressables": {
+      "version": "2.5.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.profiling.core": "1.0.2",
+        "com.unity.test-framework": "1.4.5",
+        "com.unity.modules.assetbundle": "1.0.0",
+        "com.unity.modules.jsonserialize": "1.0.0",
+        "com.unity.modules.imageconversion": "1.0.0",
+        "com.unity.modules.unitywebrequest": "1.0.0",
+        "com.unity.scriptablebuildpipeline": "2.4.0",
+        "com.unity.modules.unitywebrequestassetbundle": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
     "com.unity.ai.navigation": {
       "version": "2.0.7",
       "depth": 0,
@@ -93,6 +187,13 @@
       "dependencies": {},
       "url": "https://packages.unity.com"
     },
+    "com.unity.profiling.core": {
+      "version": "1.0.2",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
     "com.unity.render-pipelines.core": {
       "version": "17.1.0",
       "depth": 1,
@@ -135,6 +236,16 @@
         "com.unity.mathematics": "1.2.4",
         "com.unity.modules.terrain": "1.0.0"
       }
+    },
+    "com.unity.scriptablebuildpipeline": {
+      "version": "2.4.0",
+      "depth": 2,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.test-framework": "1.4.5",
+        "com.unity.modules.assetbundle": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.searcher": {
       "version": "4.9.3",
