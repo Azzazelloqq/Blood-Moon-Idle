@@ -1,0 +1,27 @@
+{
+    "name": "BloodMoonIdle.Runtime",
+    "rootNamespace": "BloodMoonIdle",
+    "references": [
+        "Unity.InputSystem",
+        "Unity.Addressables",
+        "Unity.ResourceManager",
+        "LightDI",
+        "MVP",
+        "MVVM",
+        "TickHandler",
+        "ResourceLoader",
+        "Disposable",
+        "Logger",
+        "SceneSwitcher",
+        "LocalSaveSystem"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+} 

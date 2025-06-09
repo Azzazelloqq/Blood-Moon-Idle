@@ -51,7 +51,7 @@
       "dependencies": {
         "com.azzazello.disposable": "https://github.com/Azzazelloqq/Disposable.git#v1.0.1"
       },
-      "hash": "8260dc00a96bcd8435899eb4999bf4a9e349c828"
+      "hash": "8011ad8b43738ef774b82c117071a998f3eaabe2"
     },
     "com.azzazello.resourceloader": {
       "version": "https://github.com/Azzazelloqq/ResourceLoader.git",
@@ -77,6 +77,15 @@
       "source": "git",
       "dependencies": {},
       "hash": "a9baf356016accb677741977ce0ae3ea399de2e6"
+    },
+    "com.boxqkrtm.ide.cursor": {
+      "version": "https://github.com/boxqkrtm/com.unity.ide.cursor.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.9"
+      },
+      "hash": "38fecf55e4fd94ccfe58a92ed8ad1a529ba1694e"
     },
     "com.unity.addressables": {
       "version": "2.5.0",
