@@ -1,25 +1,31 @@
+using System.Threading;
+using System.Threading.Tasks;
+using BloodMoonIdle.Runtime.UI.Joystick.Base;
+using BloodMoonIdle.UI.Joystick.Base;
 using LightDI.Runtime;
+using ResourceLoader;
+using Scripts.Generated.Addressables;
 
 namespace BloodMoonIdle.UI.Joystick
 {
     public class JoystickFactory : IJoystickFactory
     {
-        public JoystickFactory()
+        private readonly IResourceLoader _resourceLoader;
+
+        public JoystickFactory([Inject] IResourceLoader resourceLoader)
         {
+            _resourceLoader = resourceLoader;
         }
         
-        public JoystickViewModel CreateJoystick(JoystickView view)
+        public async Task<JoystickViewModel> CreateJoystickAsync(CancellationToken token)
         {
-            // Create model manually (no DI needed)
+            var virtualJoystickResourceId = ResourceIdsContainer.GameplayUI.VirtualJoystick;
+            var view = await _resourceLoader.LoadResourceAsync<JoystickViewBase>(virtualJoystickResourceId, token);
             var model = new JoystickModel();
             
-            // Create ViewModel through auto-generated factory
-            // Model parameter will be passed, dependencies auto-injected
             var viewModel = JoystickViewModelFactory.CreateJoystickViewModel(model);
-            viewModel.Initialize(); // This will automatically call model.Initialize()
-            
-            // Initialize view with ViewModel
-            view.Initialize(viewModel);
+            await viewModel.InitializeAsync(token); 
+            await view.InitializeAsync(viewModel, token);
             
             return viewModel;
         }

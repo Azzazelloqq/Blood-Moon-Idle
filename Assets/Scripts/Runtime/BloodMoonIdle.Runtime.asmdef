@@ -13,7 +13,8 @@
         "Disposable",
         "Logger",
         "SceneSwitcher",
-        "LocalSaveSystem"
+        "LocalSaveSystem",
+        "AddressablesGenerated"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
