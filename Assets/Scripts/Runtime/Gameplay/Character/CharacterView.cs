@@ -23,6 +23,7 @@ namespace BloodMoonIdle.Gameplay.Character
         
         public void PlayMoveAnimation(bool isMoving)
         {
+            return;
             if (_animator != null)
             {
                 _animator.SetBool(_moveAnimationParameter, isMoving);

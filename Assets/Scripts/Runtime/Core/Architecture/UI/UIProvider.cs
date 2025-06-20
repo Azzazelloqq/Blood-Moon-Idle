@@ -13,6 +13,13 @@ namespace BloodMoonIdle.Runtime.Core.Architecture.UI
 			
 			return created;
 		}
+		
+		public T CreateInCanvas<T>(GameObject prefab) where T : Component
+		{
+			var created = Instantiate(prefab, _mainCanvas.transform).GetComponent<T>();
+			
+			return created;
+		}
 
 		public void MoveToCanvas<T>(T targetToMove) where T : Component
 		{

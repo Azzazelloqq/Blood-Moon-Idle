@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using Azzazelloqq.MVVM.Source.ReactiveLibrary.Callbacks;
 using BloodMoonIdle.UI.Joystick.Base;
 using UnityEngine;
@@ -15,51 +17,59 @@ namespace BloodMoonIdle.UI.Joystick
 		private RectTransform _handle;
 
 		[SerializeField]
-		private float _handleRange = 1f;
+		private RectTransform _handleZone;
 
-		private Subscription<Vector2> _inputVectorSubscription;
-		private Subscription<bool> _isPressedSubscription;
-		private Subscription<bool> _isActiveSubscription;
+		private float _maxRadius;
+
+		private Subscription<Vector2> _inputVectorSub;
+		private Subscription<bool> _isPressedSub;
+		private Subscription<bool> _isActiveSub;
 
 		protected override void OnInitialize()
 		{
 			base.OnInitialize();
 
+			_maxRadius = GetMaxRadius(_background);
+
 			BindToViewModel();
 		}
 
+		protected override async Task OnInitializeAsync(CancellationToken token)
+		{
+			await base.OnInitializeAsync(token);
+			
+			_maxRadius = GetMaxRadius(_background);
+
+			BindToViewModel();
+		}
+
+		private static float GetMaxRadius(RectTransform rect)
+		{
+			return Mathf.Min(rect.rect.width, rect.rect.height) * 0.5f;
+		}
+
+
 		private void BindToViewModel()
 		{
-			_inputVectorSubscription = viewModel.InputVector.Subscribe(OnInputVectorChanged);
-			_isPressedSubscription = viewModel.IsPressed.Subscribe(OnPressedStateChanged);
-			_isActiveSubscription = viewModel.IsActive.Subscribe(OnActiveStateChanged);
+			_inputVectorSub = viewModel.InputVector.Subscribe(OnInputVectorChanged);
+			_isPressedSub = viewModel.IsPressed.Subscribe(OnPressedStateChanged);
+			_isActiveSub = viewModel.IsActive.Subscribe(OnActiveStateChanged);
 
-			compositeDisposable.AddDisposable(_inputVectorSubscription, _isPressedSubscription, _isActiveSubscription);
-		}
-
-		private void OnInputVectorChanged(Vector2 inputVector)
-		{
-			var handlePosition = inputVector * (100f * _handleRange);
-			_handle.anchoredPosition = handlePosition;
-		}
-
-		private void OnPressedStateChanged(bool isPressed)
-		{
-			if (!isPressed)
-			{
-				_handle.anchoredPosition = Vector2.zero;
-			}
-		}
-
-		private void OnActiveStateChanged(bool isActive)
-		{
-			gameObject.SetActive(isActive);
+			compositeDisposable.AddDisposable(_inputVectorSub, _isPressedSub, _isActiveSub);
 		}
 
 		public void OnPointerDown(PointerEventData eventData)
 		{
+			if (_handleZone != null &&
+				!RectTransformUtility.RectangleContainsScreenPoint(
+					_handleZone, eventData.position, eventData.pressEventCamera))
+			{
+				return;
+			}
+
+			MoveBackgroundTo(eventData);
 			viewModel.OnPointerDown(eventData.position);
-			OnDrag(eventData);
+			OnDrag(eventData); 
 		}
 
 		public void OnPointerUp(PointerEventData eventData)
@@ -75,15 +85,53 @@ namespace BloodMoonIdle.UI.Joystick
 			}
 
 			RectTransformUtility.ScreenPointToLocalPointInRectangle(
-				_background,
-				eventData.position,
-				eventData.pressEventCamera,
-				out var position);
+				_background, eventData.position, eventData.pressEventCamera, out var localPos);
 
-			position = Vector2.ClampMagnitude(position, _handleRange * 100f);
+			localPos = Vector2.ClampMagnitude(localPos, _maxRadius);
 
-			var inputVector = position / (100f * _handleRange);
-			viewModel.OnDrag(inputVector);
+			var input = localPos / _maxRadius;
+			viewModel.OnDrag(input);
+		}
+
+		private void OnInputVectorChanged(Vector2 input)
+		{
+			_handle.anchoredPosition = input * _maxRadius;
+		}
+
+		private void OnPressedStateChanged(bool isPressed)
+		{
+			if (!isPressed)
+			{
+				_handle.anchoredPosition = Vector2.zero;
+			}
+		}
+
+		private void OnActiveStateChanged(bool isActive)
+		{
+			gameObject.SetActive(isActive);
+		}
+
+		private void MoveBackgroundTo(PointerEventData eventData)
+		{
+			if (_handleZone == null)
+			{
+				return;
+			}
+
+			RectTransformUtility.ScreenPointToLocalPointInRectangle(
+				_handleZone, eventData.position, eventData.pressEventCamera, out var localPos);
+
+			var halfBg = new Vector2(_background.rect.width, _background.rect.height) * 0.5f;
+			var zone = _handleZone.rect;
+
+			localPos.x = Mathf.Clamp(localPos.x,
+				zone.xMin + halfBg.x,
+				zone.xMax - halfBg.x);
+			localPos.y = Mathf.Clamp(localPos.y,
+				zone.yMin + halfBg.y,
+				zone.yMax - halfBg.y);
+
+			_background.anchoredPosition = localPos;
 		}
 	}
 }

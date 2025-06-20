@@ -13,12 +13,10 @@ namespace BloodMoonIdle.Infrastructure.Services
         
         public InputService()
         {
-            // Additional initialization if needed
         }
         
         public void Initialize()
         {
-            // Additional initialization if needed
         }
         
         public void SetInputProvider(IInputProvider inputProvider)

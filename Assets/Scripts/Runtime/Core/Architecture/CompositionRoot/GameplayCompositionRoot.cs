@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using BloodMoonIdle.Core.Input;
 using BloodMoonIdle.Gameplay.Character.Movement;
 using BloodMoonIdle.Infrastructure.Factories;
 using BloodMoonIdle.Infrastructure.Services;
@@ -16,7 +17,7 @@ namespace BloodMoonIdle.Core.Architecture
 		[SerializeField]
 		private Transform _characterSpawnPoint;
 
-		private IDiContainer _localContainer;
+		private IDiContainer _gameplayDIContainer;
 		private IInGameLogger _logger;
 
 		public void Initialize(IInGameLogger logger)
@@ -30,6 +31,7 @@ namespace BloodMoonIdle.Core.Architecture
 			{
 				ConfigureLocalContainer();
 				RegisterGameplayServices();
+				
 				await InitializeGameplayAsync(token);
 			}
 			catch (Exception e)
@@ -40,12 +42,16 @@ namespace BloodMoonIdle.Core.Architecture
 
 		private void ConfigureLocalContainer()
 		{
-			_localContainer = DiContainerFactory.CreateContainer();
+			_gameplayDIContainer = DiContainerFactory.CreateContainer();
 		}
 
 		private void RegisterGameplayServices()
 		{
-			_localContainer.RegisterAsSingletonLazy<IMovementSystem>(() => new MovementSystem());
+			var movementSystem = new MovementSystem();
+			_gameplayDIContainer.RegisterAsSingleton<IMovementSystem>(movementSystem);
+			
+			var inputService = new InputService();
+			_gameplayDIContainer.RegisterAsSingleton<IInputService>(inputService);
 		}
 
 		private async ValueTask InitializeGameplayAsync(CancellationToken token)
@@ -73,14 +79,13 @@ namespace BloodMoonIdle.Core.Architecture
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError($"[{LogTags.GAMEPLAY_INIT}] Failed to initialize gameplay: {ex.Message}");
 				_logger.LogException(ex);
 			}
 		}
 
 		private void OnDestroy()
 		{
-			_localContainer?.Dispose();
+			_gameplayDIContainer?.Dispose();
 		}
 	}
 }

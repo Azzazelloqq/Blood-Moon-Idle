@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using LightDI.Runtime;
 using ResourceLoader;
@@ -10,13 +11,20 @@ using InGameLogger;
 using BloodMoonIdle.Infrastructure.Services;
 using SceneSwitcher;
 using System.IO;
+using BloodMoonIdle.Runtime.Core.Architecture.UI;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 namespace BloodMoonIdle.Core.Architecture
 {
     public class GameCompositionRoot : MonoBehaviour
     {
         //todo: to remove temp for test
-        [SerializeField] private GameplayCompositionRoot _gameplayCompositionRoot;
+        [SerializeField]
+        private GameplayCompositionRoot _gameplayCompositionRoot;
+
+        [SerializeField]
+        private UIProvider _uiProvider;
         
         private IDiContainer _container;
         private IInGameLogger _logger;
@@ -76,6 +84,8 @@ namespace BloodMoonIdle.Core.Architecture
             var storagePath = Path.Combine(Application.persistentDataPath, "SaveData");
             var saveSystem = new UnityBinaryLocalSaveSystem(storagePath, 1);
             _container.RegisterAsSingleton<ILocalSaveSystem>(saveSystem);
+            
+            _container.RegisterAsSingleton<IUIProvider>(_uiProvider);
         }
         private void InitializeGame()
         {

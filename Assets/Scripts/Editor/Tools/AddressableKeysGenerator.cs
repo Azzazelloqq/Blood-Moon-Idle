@@ -15,7 +15,20 @@ public static class AddressableKeysGenerator
 	private const string NamespaceName = "Scripts.Generated.Addressables";
 	private const string MainClassName = "ResourceIdsContainer";
 
-	[MenuItem("Tools/Generate Addressable Groups (CamelCase)")]
+	[MenuItem("Tools/Addressables/Print All Addresses")]
+	public static void PrintAddresses()
+	{
+		var settings = AddressableAssetSettingsDefaultObject.Settings;
+		foreach (var group in settings.groups)
+		{
+			foreach (var entry in group.entries)
+			{
+				Debug.Log($"Group: {group.Name} → Address: {entry.address}");
+			}
+		}
+	}
+	
+	[MenuItem("Tools/Addressables/Generate Addressable Groups (CamelCase)")]
 	public static void Generate()
 	{
 		CleanOldFiles();

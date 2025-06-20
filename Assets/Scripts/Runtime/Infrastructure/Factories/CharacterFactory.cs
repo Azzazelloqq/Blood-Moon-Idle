@@ -12,7 +12,7 @@ namespace BloodMoonIdle.Infrastructure.Factories
 {
     public class CharacterFactory : ICharacterFactory
     {
-        private const string CHARACTER_PREFAB_ID = "Character";
+        private const string CHARACTER_PREFAB_ID = "Hero";
         private readonly IResourceLoader _resourceLoader;
         private readonly IInGameLogger _logger;
         
@@ -26,11 +26,9 @@ namespace BloodMoonIdle.Infrastructure.Factories
         {
             try
             {
-                // Load character prefab through Addressables
                 var characterPrefab = _resourceLoader.LoadResource<GameObject>(CHARACTER_PREFAB_ID);
                 var characterGameObject = Object.Instantiate(characterPrefab, position, Quaternion.identity);
                 
-                // Get View component
                 var characterView = characterGameObject.GetComponent<CharacterView>();
                 if (characterView == null)
                 {
@@ -38,14 +36,9 @@ namespace BloodMoonIdle.Infrastructure.Factories
                     return null;
                 }
                 
-                // Create model manually (no DI needed)
                 var characterModel = new CharacterModel();
                 
-                // Create presenter through auto-generated factory
-                // Dependencies will be automatically injected through [Inject] attributes
                 var presenter = CharacterPresenterFactory.CreateCharacterPresenter(characterView, characterModel);
-                
-                // Initialize MVP triad
                 presenter.Initialize();
                 
                 _logger.Log($"[{LogTags.CHARACTER_FACTORY}] Character created successfully at {position}");
@@ -55,6 +48,7 @@ namespace BloodMoonIdle.Infrastructure.Factories
             {
                 _logger.LogError($"[{LogTags.CHARACTER_FACTORY}] Failed to create character: {ex.Message}");
                 _logger.LogException(ex);
+                
                 return null;
             }
         }
