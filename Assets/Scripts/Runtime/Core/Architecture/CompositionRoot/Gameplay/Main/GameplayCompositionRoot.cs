@@ -95,6 +95,9 @@ public class GameplayCompositionRoot : ICompositionRoot, IPersistentRoot, IPrelo
 				_sceneContext = Object.FindFirstObjectByType<GameplaySceneContext>();
 			}
 
+			#if UNITY_EDITOR
+			_sceneContext.DetectionServiceGizmos.Initialize(_detectionService);
+			#endif
 			await InitializeGameplayIfNotRegisteredAsync(token);
 
 			StartGameplay(_player.CharacterTransform);

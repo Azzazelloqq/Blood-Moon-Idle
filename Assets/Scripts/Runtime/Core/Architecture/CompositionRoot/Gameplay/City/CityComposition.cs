@@ -111,7 +111,7 @@ public class CityComposition : ICompositionRoot, ICacheable
 			40,
 			5,
 			1000,
-			15));
+			1));
 
 		_scene = await CreateSceneIfNotCreated(token);
 	}

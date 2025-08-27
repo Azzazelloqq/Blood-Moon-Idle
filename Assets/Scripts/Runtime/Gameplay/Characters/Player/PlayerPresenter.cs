@@ -46,12 +46,16 @@ namespace Runtime.Gameplay.Characters.Player
         {
             SubscribeOnModelEvents();
             
+            _detectionService.RegisterObject(view);
+            
             _tickHandler.SubscribeOnFrameUpdate(OnUpdate);
         }
 
         protected override ValueTask OnInitializeAsync(CancellationToken token)
         {
             SubscribeOnModelEvents();
+            
+            _detectionService.RegisterObject(view);
             
             _tickHandler.SubscribeOnFrameUpdate(OnUpdate);
 
@@ -60,6 +64,8 @@ namespace Runtime.Gameplay.Characters.Player
 
         protected override void OnDispose()
         {
+            _detectionService.UnregisterObject(view);
+            
             _tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
 
             UnsubscribeOnModelEvents();
@@ -67,19 +73,19 @@ namespace Runtime.Gameplay.Characters.Player
 
         protected override ValueTask OnDisposeAsync(CancellationToken token)
         {
+            _detectionService.UnregisterObject(view);
+            
             return default;
         }
 
         public override void InitializePosition(Vector3 position)
         {
             var oldPosition = model.Position;
-            if (_detectionService != null && oldPosition != Vector3.zero)
-            {
-                _detectionService.UpdateObjectPosition(view, oldPosition);
-            }
             
             model.InitializePosition(position);
             view.SetPosition(model.Position);
+            
+            _detectionService.UpdateObjectPosition(view, oldPosition);
         }
 
         public override void Enable()
@@ -119,8 +125,12 @@ namespace Runtime.Gameplay.Characters.Player
                 return;
             }
 
+            var oldPosition = model.Position;
+            
             model.ProcessMovement(deltaTime);
             ApplyMovementToView(deltaTime);
+            
+            _detectionService.UpdateObjectPosition(view, oldPosition);
         }
 
         private void SubscribeOnModelEvents()

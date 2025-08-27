@@ -64,7 +64,6 @@ public class PersonPresenter : PersonPresenterBase
 	{
 		_tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
 
-		// Unregister from detection service
 		_detectionService.UnregisterObject(view);
 
 		UnsubscribeOnModelEvents();
@@ -72,6 +71,11 @@ public class PersonPresenter : PersonPresenterBase
 
 	protected override ValueTask OnDisposeAsync(CancellationToken token)
 	{
+		_tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
+
+		_detectionService.UnregisterObject(view);
+
+		UnsubscribeOnModelEvents();
 		return default;
 	}
 
@@ -157,14 +161,10 @@ public class PersonPresenter : PersonPresenterBase
 		var oldPosition = model.Position;
 
 		model.ProcessMovement(deltaTime);
-
-		// Update detection service position if person moved
-		if (_detectionService != null && oldPosition != model.Position)
-		{
-			_detectionService.UpdateObjectPosition(view, oldPosition);
-		}
-
+		
 		ApplyMovementToView();
+		
+		_detectionService.UpdateObjectPosition(view, oldPosition);
 	}
 
 	private void ProcessPlayerDetection(float deltaTime)
@@ -245,14 +245,12 @@ public class PersonPresenter : PersonPresenterBase
 
 	private void OnModelPositionChanged(Vector3 position)
 	{
-		// Update detection service about new position
-		if (_detectionService != null)
-		{
-			_detectionService.UpdateObjectPosition(view, position);
-		}
-
+		var oldPosition = model.Position;
+		
 		view.UpdatePosition(position, Time.deltaTime);
 		UpdateNavigationState();
+		
+		_detectionService.UpdateObjectPosition(view, oldPosition);
 	}
 
 	private void OnModelWanderRequested()

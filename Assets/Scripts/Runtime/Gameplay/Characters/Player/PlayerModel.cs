@@ -78,7 +78,6 @@ namespace Runtime.Gameplay.Characters.Player
 
         public override void ProcessMovement(float deltaTime)
         {
-            var oldPosition = Position;
             var movement = Direction * MovementSpeed * deltaTime;
             Position += movement;
             
@@ -87,7 +86,6 @@ namespace Runtime.Gameplay.Characters.Player
 
         public override void InitializePosition(Vector3 position)
         {
-            var oldPosition = Position;
             Position = position;
             
             OnPositionChanged?.Invoke(Position);
