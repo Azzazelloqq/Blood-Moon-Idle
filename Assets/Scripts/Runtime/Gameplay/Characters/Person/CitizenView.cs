@@ -1,3 +1,4 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Runtime.Core.Infrastructure.TransformUtils;
@@ -7,7 +8,7 @@ using UnityEngine.AI;
 
 namespace Runtime.Gameplay.Characters.Person
 {
-public class PersonView : PersonViewBase
+public class CitizenView : CitizenViewBase
 {
 	[SerializeField]
 	private Transform _visualRoot;
@@ -45,26 +46,16 @@ public class PersonView : PersonViewBase
 
 	protected override void OnInitialize()
 	{
-		Transform = new ReadOnlyTransform(_visualRoot != null ? _visualRoot : transform);
-
-		// Get or add NavMeshAgent component
-		NavMeshAgent = GetComponent<NavMeshAgent>();
-		if (NavMeshAgent == null)
-		{
-			NavMeshAgent = gameObject.AddComponent<NavMeshAgent>();
-		}
-
-		// Configure NavMeshAgent defaults
-		NavMeshAgent.speed = 3f;
-		NavMeshAgent.acceleration = 8f;
-		NavMeshAgent.angularSpeed = 200f;
-		NavMeshAgent.stoppingDistance = 0.5f;
-		NavMeshAgent.radius = 0.5f;
-		NavMeshAgent.height = 2f;
-		NavMeshAgent.autoRepath = true;
+		InitializeComponents();
 	}
 
 	protected override ValueTask OnInitializeAsync(CancellationToken token)
+	{
+		InitializeComponents();
+		return default;
+	}
+
+	private void InitializeComponents()
 	{
 		Transform = new ReadOnlyTransform(_visualRoot != null ? _visualRoot : transform);
 
@@ -83,8 +74,6 @@ public class PersonView : PersonViewBase
 		NavMeshAgent.radius = 0.5f;
 		NavMeshAgent.height = 2f;
 		NavMeshAgent.autoRepath = true;
-
-		return default;
 	}
 
 	protected override void OnDispose()
@@ -193,63 +182,30 @@ public class PersonView : PersonViewBase
 		}
 	}
 
-	public override void StartFleeAnimation()
-	{
-		SetAnimationBool(_isFleeingParameter, true);
-
-		// Play flee audio
-		if (_fleeAudioSource != null && !_fleeAudioSource.isPlaying)
-		{
-			_fleeAudioSource.Play();
-		}
-	}
-
-	public override void StopFleeAnimation()
-	{
-		SetAnimationBool(_isFleeingParameter, false);
-
-		// Stop flee audio
-		if (_fleeAudioSource != null && _fleeAudioSource.isPlaying)
-		{
-			_fleeAudioSource.Stop();
-		}
-	}
-
-	public override void PlayConsumptionAnimation()
-	{
-		TriggerAnimation(_consumeTrigger);
-
-		if (_consumptionParticles != null)
-		{
-			_consumptionParticles.Play();
-		}
-	}
-
-	public override void SetIdleAnimation()
-	{
-		SetAnimationBool(_isMovingParameter, false);
-		SetAnimationBool(_isFleeingParameter, false);
-
-		// Stop any audio
-		if (_fleeAudioSource != null && _fleeAudioSource.isPlaying)
-		{
-			_fleeAudioSource.Stop();
-		}
-	}
-
 	public override void OnStateChanged(PersonState newState)
 	{
 		switch (newState)
 		{
 			case PersonState.Idle:
-				SetIdleAnimation();
+				StartIdle();
 				break;
 			case PersonState.Fleeing:
-				StartFleeAnimation();
+				StartFleeing();
 				break;
 			case PersonState.Consumed:
-				PlayConsumptionAnimation();
+				StartConsumption();
 				break;
+			case PersonState.BeingFedOn:
+				StartBeingFedOn();
+				break;
+			case PersonState.Dying:
+				StartDying();
+				break;
+			case PersonState.Dead:
+				OnDead();
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
 		}
 	}
 
@@ -268,6 +224,21 @@ public class PersonView : PersonViewBase
 		NavMeshAgent.SetDestination(fleeTarget);
 	}
 
+	public override void StartKilling()
+	{
+		presenter.StartBeingFedOn();
+	}
+
+	public override void StopKilling()
+	{
+		presenter.StopBeingFedOn();
+	}
+
+	public override void Kill()
+	{
+		presenter.Kill();
+	}
+
 	private void SetAnimationBool(string parameter, bool value)
 	{
 		if (_animator != null && !string.IsNullOrEmpty(parameter))
@@ -283,5 +254,147 @@ public class PersonView : PersonViewBase
 			_animator.SetTrigger(trigger);
 		}
 	}
+	
+	private void OnDead()
+	{
+		PlayDeadAnimation();
+	}
+
+	private void PlayDeadAnimation()
+	{
+	}
+
+	private void StartDying()
+	{
+		PlayDyingAnimation();
+	}
+
+	private void PlayDyingAnimation()
+	{
+		
+	}
+
+	private void StartBeingFedOn()
+	{
+		PlayBeingFedOnAnimation();
+	}
+
+	private void StartConsumption()
+	{
+		PlayConsumptionAnimation();
+	}
+
+	private void StartFleeing()
+	{
+		StartFleeAnimation();
+	}
+
+	private void StartIdle()
+	{
+		PlayIdleAnimation();
+	}
+
+	private void StartFleeAnimation()
+	{
+		SetAnimationBool(_isFleeingParameter, true);
+
+		// Play flee audio
+		if (_fleeAudioSource != null && !_fleeAudioSource.isPlaying)
+		{
+			_fleeAudioSource.Play();
+		}
+	}
+
+	private void StopFleeAnimation()
+	{
+		SetAnimationBool(_isFleeingParameter, false);
+
+		// Stop flee audio
+		if (_fleeAudioSource != null && _fleeAudioSource.isPlaying)
+		{
+			_fleeAudioSource.Stop();
+		}
+	}
+
+	private void PlayConsumptionAnimation()
+	{
+		TriggerAnimation(_consumeTrigger);
+
+		if (_consumptionParticles != null)
+		{
+			_consumptionParticles.Play();
+		}
+	}
+
+	private void PlayIdleAnimation()
+	{
+		SetAnimationBool(_isMovingParameter, false);
+		SetAnimationBool(_isFleeingParameter, false);
+
+		// Stop any audio
+		if (_fleeAudioSource != null && _fleeAudioSource.isPlaying)
+		{
+			_fleeAudioSource.Stop();
+		}
+	}
+	
+	private void PlayBeingFedOnAnimation()
+	{
+		
+	}
+
+	#if UNITY_EDITOR
+	private void OnDrawGizmosSelected()
+	{
+		DrawDetectionArea();
+	}
+
+	private void DrawDetectionArea()
+	{
+		if (presenter == null)
+		{
+			return;
+		}
+
+		var citizenPresenter = presenter as CitizenPresenter;
+		if (citizenPresenter == null)
+		{
+			return;
+		}
+
+		// Get detection parameters from presenter's detection context
+		var detectionDistance = citizenPresenter.GetDetectionDistance();
+		var detectionAngle = citizenPresenter.GetDetectionAngle();
+
+		var position = transform.position;
+		var forward = transform.forward;
+
+		// Set gizmo colors
+		Gizmos.color = Color.yellow;
+		UnityEditor.Handles.color = Color.yellow;
+
+		// Draw detection range circle
+		UnityEditor.Handles.DrawWireDisc(position, Vector3.up, detectionDistance);
+
+		// Draw detection cone if angle is less than 360 degrees
+		if (detectionAngle < 360f)
+		{
+			var halfAngle = detectionAngle * 0.5f;
+			var leftDirection = Quaternion.AngleAxis(-halfAngle, Vector3.up) * forward;
+			var rightDirection = Quaternion.AngleAxis(halfAngle, Vector3.up) * forward;
+
+			// Draw cone lines
+			Gizmos.DrawLine(position, position + leftDirection * detectionDistance);
+			Gizmos.DrawLine(position, position + rightDirection * detectionDistance);
+
+			// Draw arc for the detection cone
+			UnityEditor.Handles.DrawWireArc(position, Vector3.up, leftDirection, detectionAngle, detectionDistance);
+		}
+
+		// Draw forward direction
+		Gizmos.color = Color.red;
+		Gizmos.DrawLine(position, position + forward * detectionDistance * 0.5f);
+	}
+	#endif
 }
 }

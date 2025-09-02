@@ -22,7 +22,7 @@ using Object = UnityEngine.Object;
 
 namespace Runtime.Core.Architecture.CompositionRoot.Gameplay.City
 {
-public class CityComposition : ICompositionRoot, ICacheable
+public class CityComposition : ICompositionRoot, IPreloadable, ICacheable
 {
 	private readonly IConfig _config;
 	private readonly IResourceLoader _resourceLoader;
@@ -31,12 +31,12 @@ public class CityComposition : ICompositionRoot, ICacheable
 	private readonly ICameraService _cameraService;
 	private readonly IInGameLogger _logger;
 	private readonly ICompositeDisposable _compositeDisposable = new CompositeDisposable();
+	private readonly IСitizenSpawnService _сitizenSpawnService;
 
 	private DayNightCyclePresenterBase _dayNightCyclePresenter;
 	private PlayerPresenterBase _player;
 	private GameObject _scene;
 	private CityRootContext _sceneContext;
-	private IPeopleSpawnService _peopleSpawnService;
 
 	public CityComposition(
 		[Inject] ITickHandler tickHandler,
@@ -54,7 +54,7 @@ public class CityComposition : ICompositionRoot, ICacheable
 		_cameraService = cameraService;
 		_logger = logger;
 
-		_peopleSpawnService = PeopleSpawnServiceFactory.CreatePeopleSpawnService();
+		_сitizenSpawnService = СitizenSpawnServiceFactory.CreateСitizenSpawnService();
 	}
 
 	public void Initialize()
@@ -84,15 +84,15 @@ public class CityComposition : ICompositionRoot, ICacheable
 		_dayNightCyclePresenter.StartCycle();
 
 		var spawnParent = _sceneContext.CitizensSpawnParent;
-		_peopleSpawnService.Initialize(new SpawnSettings(
+		_сitizenSpawnService.Initialize(new SpawnSettings(
 			spawnParent,
 			3,
 			40,
 			5,
 			1000,
-			15));
+			20));
 
-		_peopleSpawnService.Enable();
+		_сitizenSpawnService.Enable();
 	}
 
 	public async ValueTask PreloadAsync(CancellationToken token)
@@ -105,13 +105,13 @@ public class CityComposition : ICompositionRoot, ICacheable
 
 		_sceneContext.SceneParent.gameObject.SetActive(false);
 		var spawnParent = _sceneContext.CitizensSpawnParent;
-		_peopleSpawnService.Initialize(new SpawnSettings(
+		_сitizenSpawnService.Initialize(new SpawnSettings(
 			spawnParent,
 			3,
 			40,
 			5,
 			1000,
-			1));
+			20));
 
 		_scene = await CreateSceneIfNotCreated(token);
 	}
@@ -121,7 +121,7 @@ public class CityComposition : ICompositionRoot, ICacheable
 		_player.Disable();
 		_scene.SetActive(false);
 		_dayNightCyclePresenter.Disable();
-		_peopleSpawnService.Disable();
+		_сitizenSpawnService.Disable();
 	}
 
 	public ValueTask DisableAsync(CancellationToken token)
@@ -129,7 +129,7 @@ public class CityComposition : ICompositionRoot, ICacheable
 		_player.Disable();
 		_scene.SetActive(false);
 		_dayNightCyclePresenter.Disable();
-		_peopleSpawnService.Disable();
+		_сitizenSpawnService.Disable();
 
 		return default;
 	}
@@ -140,7 +140,7 @@ public class CityComposition : ICompositionRoot, ICacheable
 		_player.Enable();
 		_scene.SetActive(true);
 		_dayNightCyclePresenter.Enable();
-		_peopleSpawnService.Enable();
+		_сitizenSpawnService.Enable();
 	}
 
 	public ValueTask EnableAsync(CancellationToken token)
@@ -149,14 +149,14 @@ public class CityComposition : ICompositionRoot, ICacheable
 		_player.Enable();
 		_scene.SetActive(true);
 		_dayNightCyclePresenter.Enable();
-		_peopleSpawnService.Enable();
+		_сitizenSpawnService.Enable();
 
 		return default;
 	}
 
 	public void Dispose()
 	{
-		_peopleSpawnService?.Dispose();
+		_сitizenSpawnService?.Dispose();
 		_compositeDisposable.Dispose();
 	}
 

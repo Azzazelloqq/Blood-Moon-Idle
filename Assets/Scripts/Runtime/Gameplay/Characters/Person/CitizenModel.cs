@@ -3,12 +3,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Runtime.Gameplay.Characters.Person.Base;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Runtime.Gameplay.Characters.Person
 {
-public class PersonModel : PersonModelBase
+public class CitizenModel : CitizenModelBase
 {
-	public override event Action<Vector3> OnPositionChanged;
 	public override event Action<Vector3> OnDirectionChanged;
 	public override event Action<bool> OnMovingStateChanged;
 	public override event Action<PersonState> OnStateChanged;
@@ -27,16 +27,18 @@ public class PersonModel : PersonModelBase
 	private float _nextWanderTime;
 	private readonly PersonDetectionContext _aiNavigationContext;
 
-	public PersonModel(float movementSpeed = 3f)
+	public CitizenModel(float movementSpeed = 3f)
 	{
 		MovementSpeed = movementSpeed;
 		CurrentState = PersonState.Idle;
 		IsEnable = true;
 	}
 
-	public PersonModel(float movementSpeed, PersonDetectionContext aiNavigationContext) : this(movementSpeed)
+	public CitizenModel(float movementSpeed, PersonDetectionContext aiNavigationContext) : this(movementSpeed)
 	{
 		_aiNavigationContext = aiNavigationContext;
+
+		_nextWanderTime = Time.time + Random.Range(0f, _aiNavigationContext.WanderInterval);
 	}
 
 
@@ -82,7 +84,7 @@ public class PersonModel : PersonModelBase
 		}
 	}
 
-	public override void ProcessMovement(float deltaTime)
+	public override void ProcessMovement(float deltaTime, float currentTime)
 	{
 		if (!CanMove())
 		{
@@ -92,23 +94,21 @@ public class PersonModel : PersonModelBase
 		switch (CurrentState)
 		{
 			case PersonState.Idle:
-				ProcessIdleWandering(deltaTime);
+				ProcessIdleWandering(deltaTime, currentTime);
 				break;
-
 			case PersonState.Fleeing:
 			case PersonState.Consumed:
-				// No additional logic needed - presenter handles navigation
 				break;
 		}
 	}
 
-	private void ProcessIdleWandering(float deltaTime)
+	private void ProcessIdleWandering(float deltaTime, float currentTime)
 	{
 		// Check if it's time to wander to a new location
-		if (Time.time >= _nextWanderTime)
+		if (currentTime >= _nextWanderTime)
 		{
 			RequestNewWanderTarget();
-			_nextWanderTime = Time.time + _aiNavigationContext.WanderInterval;
+			_nextWanderTime = currentTime + _aiNavigationContext.WanderInterval;
 		}
 	}
 
@@ -122,7 +122,6 @@ public class PersonModel : PersonModelBase
 		if (Vector3.Distance(Position, newPosition) > 0.01f)
 		{
 			Position = newPosition;
-			OnPositionChanged?.Invoke(Position);
 		}
 
 		if (_isMoving != isMoving)
@@ -143,22 +142,40 @@ public class PersonModel : PersonModelBase
 	public override void InitializePosition(Vector3 position)
 	{
 		Position = position;
-		OnPositionChanged?.Invoke(Position);
 	}
 
 	public override void SetFleeTarget(Vector3 playerPosition)
 	{
-		// Calculate desired flee direction and distance - presenter will handle NavMesh validation
 		var fleeDirection = (Position - playerPosition).normalized;
 		var desiredFleePosition = playerPosition + fleeDirection * _aiNavigationContext.FleeDistance;
 
 		FleeTarget = desiredFleePosition;
 	}
 
-	// Getter for AI navigation context (for presenter to use)
 	public override PersonDetectionContext GetNavigationContext()
 	{
 		return _aiNavigationContext;
+	}
+
+	public override void StartBeingFedOn()
+	{
+		CurrentState = PersonState.BeingFedOn;
+		
+		OnStateChanged?.Invoke(CurrentState);
+	}
+
+	public override void StopBeingFedOn()
+	{
+		CurrentState = PersonState.Idle;
+		
+		OnStateChanged?.Invoke(CurrentState);
+	}
+
+	public override void Kill()
+	{
+		CurrentState = PersonState.Dead;
+		
+		OnStateChanged?.Invoke(CurrentState);
 	}
 
 	public override void StartFleeing()
@@ -201,6 +218,9 @@ public class PersonModel : PersonModelBase
 
 		CurrentState = PersonState.Idle;
 		FleeTarget = Vector3.zero;
+
+		_nextWanderTime = Time.time + Random.Range(1f, _aiNavigationContext.WanderInterval);
+
 		OnStateChanged?.Invoke(CurrentState);
 	}
 

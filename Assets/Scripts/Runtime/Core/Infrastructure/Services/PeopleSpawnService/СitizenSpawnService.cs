@@ -10,12 +10,11 @@ using Runtime.Gameplay.Characters.Base;
 using Runtime.Gameplay.Characters.Person;
 using Runtime.Gameplay.Characters.Player;
 using UnityEngine;
-using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace Runtime.Core.Infrastructure.Services.PeopleSpawnService
 {
-public class PeopleSpawnService : IPeopleSpawnService
+public class СitizenSpawnService : IСitizenSpawnService
 {
 	public event Action<ICharacter> OnCharacterSpawned;
 	public event Action<ICharacter> OnCharacterConsumed;
@@ -36,7 +35,7 @@ public class PeopleSpawnService : IPeopleSpawnService
 	private List<Task> _reusableTaskList;
 	private readonly PersonDetectionContext _detectionContextTest;
 	
-	public PeopleSpawnService(
+	public СitizenSpawnService(
 		[Inject] ICameraService cameraService,
 		[Inject] IInGameLogger logger,
 		[Inject] PlayerFactory playerFactory)
@@ -48,10 +47,10 @@ public class PeopleSpawnService : IPeopleSpawnService
 		_detectionContextTest = new PersonDetectionContext(
 			8f,     
 			360f,   
-			1,     
+			1 << 5,     
 			0.2f,  
 			15f,     
-			10f,     
+			50f,     
 			5f);   
 
 	}
@@ -421,7 +420,7 @@ public class PeopleSpawnService : IPeopleSpawnService
 		try
 		{
 			var spawnParent = _spawnSettings.SpawnParent;
-			var personFactory = PersonFactoryFactory.CreatePersonFactory(_detectionContextTest);
+			var personFactory = CitizenFactoryFactory.CreateCitizenFactory(_detectionContextTest);
 			var character = await personFactory.CreatePersonAsync(spawnParent, position, token);
 
 			return character;

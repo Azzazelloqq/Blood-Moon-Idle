@@ -1,11 +1,12 @@
 using Azzazelloqq.DetectionService.Source;
 using MVP;
 using Runtime.Core.Infrastructure.TransformUtils;
+using Runtime.Gameplay.Characters.Player;
 using UnityEngine;
 
 namespace Runtime.Gameplay.Characters.Person.Base
 {
-public abstract class PersonViewBase : ViewMonoBehaviour<PersonPresenterBase>, IDetectable
+public abstract class CitizenViewBase : ViewMonoBehaviour<CitizenPresenterBase>, IDetectable, IKillableByPlayer
 {
 	public abstract Transform VisualRoot { get; }
 	public abstract ReadOnlyTransform Transform { get; protected set; }
@@ -21,13 +22,12 @@ public abstract class PersonViewBase : ViewMonoBehaviour<PersonPresenterBase>, I
 	public abstract void UpdateMovementState(bool isMoving);
 	public abstract void SetActive(bool isActive);
 	public abstract void SetPosition(Vector3 position);
-	public abstract void StartFleeAnimation();
-	public abstract void StopFleeAnimation();
-	public abstract void PlayConsumptionAnimation();
-	public abstract void SetIdleAnimation();
 	public abstract void OnStateChanged(PersonState newState);
 	public abstract void SetMoveSpeed(float movementSpeed);
 	public abstract void SetStoppingDistance(float stopppingDistance);
 	public abstract void SetTargetDestination(Vector3 fleeTarget);
+	public abstract void StartKilling();
+	public abstract void StopKilling();
+	public abstract void Kill();
 }
 }

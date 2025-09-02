@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Runtime.Core.Infrastructure.Services.PeopleSpawnService
 {
-public interface IPeopleSpawnService : IDisposable
+public interface IСitizenSpawnService : IDisposable
 {
 	/// <summary>
 	/// Event triggered when a character is spawned
@@ -19,7 +19,6 @@ public interface IPeopleSpawnService : IDisposable
 	/// <summary>
 	/// Initializes the spawn service with specified target count
 	/// </summary>
-	/// <param name="targetPeopleCount">Target number of people to maintain on the map</param>
 	/// <param name="spawnSettings">Settings of spawn</param>
 	void Initialize(SpawnSettings spawnSettings);
 

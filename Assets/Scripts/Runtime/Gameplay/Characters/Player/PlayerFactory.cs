@@ -17,14 +17,14 @@ namespace Runtime.Gameplay.Characters.Player
 public class PlayerFactory : IDisposable
 {
 	private const int PlayerCurrentLevel = 0;
-	
+
 	private readonly IConfig _config;
 	private readonly IResourceLoader _resourceLoader;
 	private readonly IDetectionService _detectionService;
 	private PlayerPresenterBase _player;
 
 	public PlayerFactory(
-		[Inject] IConfig config, 
+		[Inject] IConfig config,
 		[Inject] IResourceLoader resourceLoader,
 		[Inject] IDetectionService detectionService)
 	{
@@ -37,7 +37,7 @@ public class PlayerFactory : IDisposable
 	{
 		_player?.Dispose();
 	}
-	
+
 	public async Task<PlayerPresenterBase> GetOrCreatePlayerAsync(Transform parent, CancellationToken token)
 	{
 		if (_player == null)
@@ -100,17 +100,16 @@ public class PlayerFactory : IDisposable
 		var playerModel = new PlayerModel(moveSpeedByLevel, PlayerCurrentLevel);
 		var playerViewId = ResourceIdsContainer.Characters.Hero;
 
-		_resourceLoader.LoadResource<PlayerView>(playerViewId, (resource)=>
+		_resourceLoader.LoadResource<PlayerView>(playerViewId, (resource) =>
 		{
 			var view = Object.Instantiate(resource, spawnPoint).GetComponent<PlayerView>();
 			_player = PlayerPresenterFactory.CreatePlayerPresenter(view, playerModel);
 			_player.Initialize();
-			
+
 			// Register player view with detection service so NPCs can detect it
 			_detectionService?.RegisterObject(view);
-			
+
 			onCreated?.Invoke(_player);
-			
 		}, token);
 	}
 
@@ -121,12 +120,9 @@ public class PlayerFactory : IDisposable
 		var playerViewId = ResourceIdsContainer.Characters.Hero;
 
 		var playerView = await _resourceLoader.LoadAndCreateAsync<PlayerView, Transform>(playerViewId, spawnPoint, token);
-			
+
 		var player = PlayerPresenterFactory.CreatePlayerPresenter(playerView, playerModel);
 		await player.InitializeAsync(token);
-
-		// Register player view with detection service so NPCs can detect it
-		_detectionService?.RegisterObject(playerView);
 
 		return player;
 	}

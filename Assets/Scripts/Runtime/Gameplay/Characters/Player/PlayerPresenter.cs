@@ -6,167 +6,179 @@ using LightDI.Runtime;
 using Runtime.Core.Architecture.Input;
 using Runtime.Core.Infrastructure.Config.Local.PlayerConfig;
 using Runtime.Core.Infrastructure.TransformUtils;
+using Runtime.Gameplay.Characters.Person.Base;
 using Runtime.Gameplay.Characters.Player.Base;
 using TickHandler;
 using UnityEngine;
 
 namespace Runtime.Gameplay.Characters.Player
 {
-    public class PlayerPresenter : PlayerPresenterBase
-    {
-        public override ReadOnlyTransform CharacterTransform => view.Transform;
+public class PlayerPresenter : PlayerPresenterBase
+{
+	public override ReadOnlyTransform CharacterTransform => view.Transform;
+	public override Vector3 Position => model.Position;
 
-        private readonly IInputService _inputService;
-        private readonly IConfig _config;
-        private readonly ITickHandler _tickHandler;
-        private readonly IDetectionService _detectionService;
-        private PlayerConfigPage _playerConfig;
+	private readonly IInputService _inputService;
+	private readonly IConfig _config;
+	private readonly ITickHandler _tickHandler;
+	private readonly IDetectionService _detectionService;
+	private PlayerConfigPage _playerConfig;
 
-        public PlayerPresenter(
-            PlayerViewBase view,
-            PlayerModelBase model,
-            [Inject] IInputService inputService,
-            [Inject] IConfig config,
-            [Inject] ITickHandler tickHandler,
-            [Inject] IDetectionService detectionService) 
-            : base(view, model)
-        {
-            _inputService = inputService;
-            _config = config;
-            _tickHandler = tickHandler;
-            _detectionService = detectionService;
+	public PlayerPresenter(
+		PlayerViewBase view,
+		PlayerModelBase model,
+		[Inject] IInputService inputService,
+		[Inject] IConfig config,
+		[Inject] ITickHandler tickHandler,
+		[Inject] IDetectionService detectionService)
+		: base(view, model)
+	{
+		_inputService = inputService;
+		_config = config;
+		_tickHandler = tickHandler;
+		_detectionService = detectionService;
 
-            if (_config.IsInitialized)
-            {
-                _playerConfig = _config.GetConfigPage<PlayerConfigPage>();
-            }
-        }
-        
-        protected override void OnInitialize()
-        {
-            SubscribeOnModelEvents();
-            
-            _detectionService.RegisterObject(view);
-            
-            _tickHandler.SubscribeOnFrameUpdate(OnUpdate);
-        }
+		if (_config.IsInitialized)
+		{
+			_playerConfig = _config.GetConfigPage<PlayerConfigPage>();
+		}
+	}
 
-        protected override ValueTask OnInitializeAsync(CancellationToken token)
-        {
-            SubscribeOnModelEvents();
-            
-            _detectionService.RegisterObject(view);
-            
-            _tickHandler.SubscribeOnFrameUpdate(OnUpdate);
+	protected override void OnInitialize()
+	{
+		SubscribeOnModelEvents();
 
-            return default;
-        }
+		_detectionService.RegisterObject(view);
 
-        protected override void OnDispose()
-        {
-            _detectionService.UnregisterObject(view);
-            
-            _tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
+		_tickHandler.SubscribeOnFrameUpdate(OnUpdate);
+	}
 
-            UnsubscribeOnModelEvents();
-        }
+	protected override ValueTask OnInitializeAsync(CancellationToken token)
+	{
+		SubscribeOnModelEvents();
 
-        protected override ValueTask OnDisposeAsync(CancellationToken token)
-        {
-            _detectionService.UnregisterObject(view);
-            
-            return default;
-        }
+		_detectionService.RegisterObject(view);
 
-        public override void InitializePosition(Vector3 position)
-        {
-            var oldPosition = model.Position;
-            
-            model.InitializePosition(position);
-            view.SetPosition(model.Position);
-            
-            _detectionService.UpdateObjectPosition(view, oldPosition);
-        }
+		_tickHandler.SubscribeOnFrameUpdate(OnUpdate);
 
-        public override void Enable()
-        {
-            model.Enable();
-            
-            view.SetActive(model.IsEnable);
-        }
+		return default;
+	}
 
-        public override void Disable()
-        {
-            model.Disable();
-            
-            view.SetActive(model.IsEnable);
-        }
+	protected override void OnDispose()
+	{
+		_detectionService.UnregisterObject(view);
 
-        public override void UpdateParent(Transform parent)
-        {
-            view.SetParent(parent);
-        }
+		_tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
 
-        private void OnUpdate(float deltaTime)
-        {
-            ProcessMovement(deltaTime);
-        }
+		UnsubscribeOnModelEvents();
+	}
 
-        private void ProcessMovement(float deltaTime)
-        {
-            var inputDirection = _inputService.MovementDirection;
+	protected override ValueTask OnDisposeAsync(CancellationToken token)
+	{
+		_detectionService.UnregisterObject(view);
 
-            var direction = new Vector3(inputDirection.x, 0, inputDirection.y).normalized;
+		return default;
+	}
 
-            model.SetDirection(direction);
+	public override void InitializePosition(Vector3 position)
+	{
+		var oldPosition = model.Position;
 
-            if (!model.CanMove())
-            {
-                return;
-            }
+		model.InitializePosition(position);
+		view.SetPosition(model.Position);
 
-            var oldPosition = model.Position;
-            
-            model.ProcessMovement(deltaTime);
-            ApplyMovementToView(deltaTime);
-            
-            _detectionService.UpdateObjectPosition(view, oldPosition);
-        }
+		_detectionService.UpdateObjectPosition(view, oldPosition);
+	}
 
-        private void SubscribeOnModelEvents()
-        {
-            var playerModel = model as PlayerModel;
-            if (playerModel != null)
-            {
-                playerModel.OnDirectionChanged += OnModelDirectionChanged;
-                playerModel.OnIsMovingChanged += OnModelMovingStateChanged;
-            }
-        }
+	public override void Enable()
+	{
+		model.Enable();
 
-        private void UnsubscribeOnModelEvents()
-        {
-            var playerModel = model as PlayerModel;
-            if (playerModel != null)
-            {
-                playerModel.OnDirectionChanged -= OnModelDirectionChanged;
-                playerModel.OnIsMovingChanged -= OnModelMovingStateChanged;
-            }
-        }
+		view.SetActive(model.IsEnable);
+	}
 
-        private void ApplyMovementToView(float deltaTime)
-        {
-            view.UpdatePosition(model.Position, deltaTime);
-            view.UpdateRotation(model.Direction);
-        }
+	public override void Disable()
+	{
+		model.Disable();
 
-        private void OnModelDirectionChanged(Vector3 direction)
-        {
-            view.UpdateRotation(direction);
-        }
+		view.SetActive(model.IsEnable);
+	}
 
-        private void OnModelMovingStateChanged(bool isMoving)
-        {
-            view.UpdateMovementState(isMoving);
-        }
-    }
-} 
+	public override void UpdateParent(Transform parent)
+	{
+		view.SetParent(parent);
+	}
+
+	public override void OnTriggerEnter(Collider other)
+	{
+		if (!other.TryGetComponent(out IKillableByPlayer killable))
+		{
+			return;
+		}
+		
+		killable.Kill();
+	}
+
+	private void OnUpdate(float deltaTime)
+	{
+		ProcessMovement(deltaTime);
+	}
+
+	private void ProcessMovement(float deltaTime)
+	{
+		var inputDirection = _inputService.MovementDirection;
+
+		var direction = new Vector3(inputDirection.x, 0, inputDirection.y).normalized;
+
+		model.SetDirection(direction);
+
+		if (!model.CanMove())
+		{
+			return;
+		}
+
+		var oldPosition = model.Position;
+
+		model.ProcessMovement(deltaTime);
+		ApplyMovementToView(deltaTime);
+
+		_detectionService.UpdateObjectPosition(view, oldPosition);
+	}
+
+	private void SubscribeOnModelEvents()
+	{
+		var playerModel = model as PlayerModel;
+		if (playerModel != null)
+		{
+			playerModel.OnDirectionChanged += OnModelDirectionChanged;
+			playerModel.OnIsMovingChanged += OnModelMovingStateChanged;
+		}
+	}
+
+	private void UnsubscribeOnModelEvents()
+	{
+		var playerModel = model as PlayerModel;
+		if (playerModel != null)
+		{
+			playerModel.OnDirectionChanged -= OnModelDirectionChanged;
+			playerModel.OnIsMovingChanged -= OnModelMovingStateChanged;
+		}
+	}
+
+	private void ApplyMovementToView(float deltaTime)
+	{
+		view.UpdatePosition(model.Position, deltaTime);
+		view.UpdateRotation(model.Direction);
+	}
+
+	private void OnModelDirectionChanged(Vector3 direction)
+	{
+		view.UpdateRotation(direction);
+	}
+
+	private void OnModelMovingStateChanged(bool isMoving)
+	{
+		view.UpdateMovementState(isMoving);
+	}
+}
+}

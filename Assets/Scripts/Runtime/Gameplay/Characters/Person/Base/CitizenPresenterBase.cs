@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Runtime.Gameplay.Characters.Person.Base
 {
-public abstract class PersonPresenterBase : Presenter<PersonViewBase, PersonModelBase>, ICharacter
+public abstract class CitizenPresenterBase : Presenter<CitizenViewBase, CitizenModelBase>, ICharacter
 {
 	public abstract PersonState CurrentState { get; }
 	public abstract bool CanBeConsumed { get; }
@@ -14,7 +14,7 @@ public abstract class PersonPresenterBase : Presenter<PersonViewBase, PersonMode
 	public abstract ReadOnlyTransform Transform { get; }
 	public abstract bool IsActive { get; }
 
-	protected PersonPresenterBase(PersonViewBase view, PersonModelBase model) : base(view, model)
+	protected CitizenPresenterBase(CitizenViewBase view, CitizenModelBase model) : base(view, model)
 	{
 	}
 
@@ -24,8 +24,11 @@ public abstract class PersonPresenterBase : Presenter<PersonViewBase, PersonMode
 	public abstract void UpdateParent(Transform parent);
 	public abstract void StartFleeing(Vector3 fleeTarget);
 	public abstract void StopFleeing();
-	public abstract void ConsumeByPlayer();
+	public abstract void Consume();
 	public abstract void SetIdleState();
 	public abstract void OnPlayerDetected(Vector3 playerPosition);
+	public abstract void StartBeingFedOn();
+	public abstract void StopBeingFedOn();
+	public abstract void Kill();
 }
 }

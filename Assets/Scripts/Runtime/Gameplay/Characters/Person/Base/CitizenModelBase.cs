@@ -4,9 +4,8 @@ using UnityEngine;
 
 namespace Runtime.Gameplay.Characters.Person.Base
 {
-public abstract class PersonModelBase : Model
+public abstract class CitizenModelBase : Model
 {
-	public abstract event Action<Vector3> OnPositionChanged;
 	public abstract event Action<Vector3> OnDirectionChanged;
 	public abstract event Action<bool> OnMovingStateChanged;
 	public abstract event Action<PersonState> OnStateChanged;
@@ -30,17 +29,23 @@ public abstract class PersonModelBase : Model
 	public abstract void InitializePosition(Vector3 position);
 	public abstract void Enable();
 	public abstract void Disable();
-	public abstract void ProcessMovement(float deltaTime);
+	public abstract void ProcessMovement(float deltaTime, float currentTime);
 	public abstract bool CanMove();
 	public abstract void UpdatePositionFromNavigation(Vector3 currentPosition, bool isMoving);
 	public abstract void OnReachedDestination();
 	public abstract PersonDetectionContext GetNavigationContext();
+	public abstract void StartBeingFedOn();
+	public abstract void StopBeingFedOn();
+	public abstract void Kill();
 }
 
 public enum PersonState
 {
 	Idle,
 	Fleeing,
-	Consumed
+	Consumed,
+	BeingFedOn,
+	Dying,
+	Dead,
 }
 }

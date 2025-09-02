@@ -21,4 +21,3 @@ public abstract class PlayerModelBase : Model
 	public abstract void InitializePosition(Vector3 position);
 }
 }
-

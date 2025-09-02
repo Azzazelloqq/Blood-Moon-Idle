@@ -1,22 +1,20 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Azzazelloqq.DetectionService.Source;
 using LightDI.Runtime;
 using ResourceLoader;
 using Runtime.Gameplay.Characters.Person.Base;
 using Scripts.Generated.Addressables;
-using TickHandler;
 using UnityEngine;
 
 namespace Runtime.Gameplay.Characters.Person
 {
-public class PersonFactory
+public class CitizenFactory
 {
 	private readonly IResourceLoader _resourceLoader;
 	private readonly PersonDetectionContext _detectionContext;
-	private PersonView _viewPrefab;
+	private CitizenView _viewPrefab;
 
-	public PersonFactory(
+	public CitizenFactory(
 		[Inject] IResourceLoader resourceLoader,
 		PersonDetectionContext detectionContext)
 	{
@@ -24,27 +22,30 @@ public class PersonFactory
 		_detectionContext = detectionContext;
 	}
 
-	public async Task<PersonPresenterBase> CreatePersonAsync(Transform parent, Vector3 spawnPosition, CancellationToken token)
+	public async Task<CitizenPresenterBase> CreatePersonAsync(
+		Transform parent,
+		Vector3 spawnPosition,
+		CancellationToken token)
 	{
 		if (_viewPrefab == null)
 		{
 			var viewResourceId = ResourceIdsContainer.Characters.СitizenView;
-			_viewPrefab = await _resourceLoader.LoadResourceAsync<PersonView>(viewResourceId, token);
+			_viewPrefab = await _resourceLoader.LoadResourceAsync<CitizenView>(viewResourceId, token);
 		}
 
 		var personView = Object.Instantiate(_viewPrefab, parent);
-		var personModel = new PersonModel(3f, _detectionContext);
-		
-		// Create presenter
-		var personPresenter = PersonPresenterFactory.CreatePersonPresenter(
-			personView, 
-			personModel, 
+		var personModel = new CitizenModel(3f, _detectionContext);
+
+		// Create presenter using auto-generated factory
+		var personPresenter = CitizenPresenterFactory.CreateCitizenPresenter(
+			personView,
+			personModel,
 			_detectionContext);
-		
+
 		// Initialize
 		await personPresenter.InitializeAsync(token);
 		personPresenter.InitializePosition(spawnPosition);
-		
+
 		return personPresenter;
 	}
 }

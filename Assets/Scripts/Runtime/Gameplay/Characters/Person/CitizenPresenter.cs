@@ -1,9 +1,11 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Azzazelloqq.DetectionService.Source;
 using LightDI.Runtime;
 using Runtime.Core.Infrastructure.TransformUtils;
 using Runtime.Gameplay.Characters.Person.Base;
+using Runtime.Gameplay.Characters.Player;
 using TickHandler;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,7 +13,7 @@ using Random = UnityEngine.Random;
 
 namespace Runtime.Gameplay.Characters.Person
 {
-public class PersonPresenter : PersonPresenterBase
+public class CitizenPresenter : CitizenPresenterBase
 {
 	public override ReadOnlyTransform Transform => view.Transform;
 	public override PersonState CurrentState => model.CurrentState;
@@ -25,9 +27,9 @@ public class PersonPresenter : PersonPresenterBase
 	private readonly ITickHandler _tickHandler;
 	private float _lastDetectionCheck;
 
-	public PersonPresenter(
-		PersonViewBase view,
-		PersonModelBase model,
+	public CitizenPresenter(
+		CitizenViewBase view,
+		CitizenModelBase model,
 		[Inject] IDetectionService detectionService,
 		[Inject] ITickHandler tickHandler,
 		PersonDetectionContext detectionContext) : base(view, model)
@@ -42,9 +44,7 @@ public class PersonPresenter : PersonPresenterBase
 		SubscribeOnModelEvents();
 
 		view.SetMoveSpeed(model.MovementSpeed);
-
 		_detectionService.RegisterObject(view);
-
 		_tickHandler.SubscribeOnFrameUpdate(OnUpdate);
 	}
 
@@ -54,7 +54,6 @@ public class PersonPresenter : PersonPresenterBase
 
 		view.SetMoveSpeed(model.MovementSpeed);
 		_detectionService.RegisterObject(view);
-
 		_tickHandler.SubscribeOnFrameUpdate(OnUpdate);
 
 		return default;
@@ -63,27 +62,27 @@ public class PersonPresenter : PersonPresenterBase
 	protected override void OnDispose()
 	{
 		_tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
-
 		_detectionService.UnregisterObject(view);
-
 		UnsubscribeOnModelEvents();
 	}
 
 	protected override ValueTask OnDisposeAsync(CancellationToken token)
 	{
 		_tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
-
 		_detectionService.UnregisterObject(view);
-
 		UnsubscribeOnModelEvents();
+
 		return default;
 	}
 
 	public override void InitializePosition(Vector3 position)
 	{
+		var oldPosition = model.Position;
 		model.InitializePosition(position);
 
 		view.SetPosition(model.Position);
+
+		_detectionService.UpdateObjectPosition(view, oldPosition);
 	}
 
 	public override void Enable()
@@ -119,7 +118,7 @@ public class PersonPresenter : PersonPresenterBase
 		model.StopFleeing();
 	}
 
-	public override void ConsumeByPlayer()
+	public override void Consume()
 	{
 		if (!model.CanBeConsumed())
 		{
@@ -127,7 +126,6 @@ public class PersonPresenter : PersonPresenterBase
 		}
 
 		model.MarkAsConsumed();
-		view.PlayConsumptionAnimation();
 	}
 
 	public override void SetIdleState()
@@ -150,31 +148,160 @@ public class PersonPresenter : PersonPresenterBase
 		StartFleeing(fleeTarget);
 	}
 
-
-	private void ProcessMovement(float deltaTime)
+	public override void StartBeingFedOn()
 	{
-		if (!model.CanMove())
+		model.StartBeingFedOn();
+	}
+
+	public override void StopBeingFedOn()
+	{
+		model.StopBeingFedOn();
+	}
+
+	public override void Kill()
+	{
+		model.Kill();
+	}
+
+	private void SubscribeOnModelEvents()
+	{
+		model.OnDirectionChanged += OnModelDirectionChanged;
+		model.OnMovingStateChanged += OnModelMovingStateChanged;
+		model.OnStateChanged += OnModelStateChanged;
+		model.OnConsumed += OnModelConsumed;
+		model.OnWanderRequested += OnModelWanderRequested;
+	}
+
+	private void UnsubscribeOnModelEvents()
+	{
+		model.OnDirectionChanged -= OnModelDirectionChanged;
+		model.OnMovingStateChanged -= OnModelMovingStateChanged;
+		model.OnStateChanged -= OnModelStateChanged;
+		model.OnConsumed -= OnModelConsumed;
+		model.OnWanderRequested -= OnModelWanderRequested;
+	}
+
+
+	private void OnModelWanderRequested()
+	{
+		if (model.CurrentState != PersonState.Idle)
 		{
 			return;
 		}
 
+		var wanderTarget = GetRandomWanderPoint();
+		view.SetTargetDestination(wanderTarget);
+	}
+
+	private void UpdateNavigationState()
+	{
+		var isMoving = view.Magnitude > 0.1f;
+		var currentPosition = view.transform.position;
+
+		model.UpdatePositionFromNavigation(currentPosition, isMoving);
+
+		// Check if reached destination
+		if (!view.PathPending && view.RemainingDistance < 0.5f)
+		{
+			model.OnReachedDestination();
+		}
+	}
+
+	private Vector3 GetRandomWanderPoint()
+	{
+		if (model == null)
+		{
+			return default;
+		}
+
+		var navContext = model.GetNavigationContext();
+		var currentPosition = model.Position;
+
+		for (var attempts = 0; attempts < 5; attempts++)
+		{
+			var randomDirection = Random.insideUnitSphere * navContext.WanderRadius;
+			randomDirection += currentPosition;
+
+			if (NavMesh.SamplePosition(randomDirection, out var hit, navContext.WanderRadius, NavMesh.AllAreas))
+			{
+				return hit.position;
+			}
+		}
+
+		return default;
+	}
+
+	private void OnModelDirectionChanged(Vector3 direction)
+	{
+		view.UpdateRotation(direction);
+	}
+
+	private void OnModelMovingStateChanged(bool isMoving)
+	{
+		view.UpdateMovementState(isMoving);
+	}
+
+	private void OnModelStateChanged(PersonState newState)
+	{
+		view.OnStateChanged(newState);
+
+		switch (newState)
+		{
+			case PersonState.Fleeing:
+
+				var fleeTarget = ValidateNavMeshPosition(model.FleeTarget);
+				view.SetTargetDestination(fleeTarget);
+				break;
+			case PersonState.Idle:
+				break;
+			case PersonState.Consumed:
+				break;
+			case PersonState.BeingFedOn:
+				break;
+			case PersonState.Dying:
+				break;
+			case PersonState.Dead:
+				Dispose();
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(newState), newState, null);
+		}
+	}
+
+
+	private Vector3 ValidateNavMeshPosition(Vector3 targetPosition)
+	{
+		if (NavMesh.SamplePosition(targetPosition, out var hit, 5f, NavMesh.AllAreas))
+		{
+			return hit.position;
+		}
+
+		return default;
+	}
+
+	private void OnModelConsumed()
+	{
+	}
+
+	private void OnUpdate(float deltaTime)
+	{
 		var oldPosition = model.Position;
 
-		model.ProcessMovement(deltaTime);
-		
-		ApplyMovementToView();
-		
-		_detectionService.UpdateObjectPosition(view, oldPosition);
+		model.ProcessMovement(deltaTime, Time.time);
+		UpdateNavigationState();
+
+		// Update detection service if position changed
+		if (Vector3.Distance(oldPosition, model.Position) > 0.01f)
+		{
+			_detectionService.UpdateObjectPosition(view, oldPosition);
+		}
+
+		ProcessPlayerDetection(deltaTime);
 	}
 
 	private void ProcessPlayerDetection(float deltaTime)
 	{
-		if (!model.CanMove())
-		{
-			return;
-		}
-
-		if (model.CurrentState == PersonState.Fleeing)
+		if (!model.CanMove() || model.CurrentState == PersonState.Fleeing)
 		{
 			return;
 		}
@@ -201,159 +328,26 @@ public class PersonPresenter : PersonPresenterBase
 
 		foreach (var detectedObject in detectedObjects)
 		{
-			// For now, detect any IDetectable object as potential player
-			// In a more sophisticated setup, you'd check for specific player interface
-			OnPlayerDetected(detectedObject.Position);
-			break; // Only react to first detected object
-		}
-	}
-
-	private void ApplyMovementToView()
-	{
-		view.UpdatePosition(model.Position, Time.deltaTime);
-		if (model.Direction != Vector3.zero)
-		{
-			view.UpdateRotation(model.Direction);
-		}
-	}
-
-	private void SubscribeOnModelEvents()
-	{
-		if (model != null)
-		{
-			model.OnPositionChanged += OnModelPositionChanged;
-			model.OnDirectionChanged += OnModelDirectionChanged;
-			model.OnMovingStateChanged += OnModelMovingStateChanged;
-			model.OnStateChanged += OnModelStateChanged;
-			model.OnConsumed += OnModelConsumed;
-			model.OnWanderRequested += OnModelWanderRequested;
-		}
-	}
-
-	private void UnsubscribeOnModelEvents()
-	{
-		if (model != null)
-		{
-			model.OnPositionChanged -= OnModelPositionChanged;
-			model.OnDirectionChanged -= OnModelDirectionChanged;
-			model.OnMovingStateChanged -= OnModelMovingStateChanged;
-			model.OnStateChanged -= OnModelStateChanged;
-			model.OnConsumed -= OnModelConsumed;
-			model.OnWanderRequested -= OnModelWanderRequested;
-		}
-	}
-
-	private void OnModelPositionChanged(Vector3 position)
-	{
-		var oldPosition = model.Position;
-		
-		view.UpdatePosition(position, Time.deltaTime);
-		UpdateNavigationState();
-		
-		_detectionService.UpdateObjectPosition(view, oldPosition);
-	}
-
-	private void OnModelWanderRequested()
-	{
-		var wanderTarget = GetRandomWanderPoint();
-		if (wanderTarget.HasValue)
-		{
-			view.SetTargetDestination(wanderTarget.Value);
-		}
-	}
-
-	private void UpdateNavigationState()
-	{
-		// Update model with current navigation state
-		var isMoving = view.Magnitude > 0.1f;
-		var currentPosition = view.transform.position;
-
-		model.UpdatePositionFromNavigation(currentPosition, isMoving);
-
-		// Check if reached destination
-		if (!view.PathPending && view.RemainingDistance < 0.5f)
-		{
-			model.OnReachedDestination();
-		}
-	}
-
-	private Vector3? GetRandomWanderPoint()
-	{
-		if (model == null)
-		{
-			return null;
-		}
-
-		var navContext = model.GetNavigationContext();
-		var currentPosition = model.Position;
-
-		for (var attempts = 0; attempts < 5; attempts++)
-		{
-			var randomDirection = Random.insideUnitSphere * navContext.WanderRadius;
-			randomDirection += currentPosition;
-
-			if (NavMesh.SamplePosition(randomDirection, out var hit, navContext.WanderRadius, NavMesh.AllAreas))
+			if (detectedObject is not PlayerView)
 			{
-				return hit.position;
+				continue;
 			}
-		}
 
-		return null;
-	}
-
-	private void OnModelDirectionChanged(Vector3 direction)
-	{
-		view.UpdateRotation(direction);
-	}
-
-	private void OnModelMovingStateChanged(bool isMoving)
-	{
-		view.UpdateMovementState(isMoving);
-	}
-
-	private void OnModelStateChanged(PersonState newState)
-	{
-		view.OnStateChanged(newState);
-
-		// Update navigation based on state
-
-		switch (newState)
-		{
-			case PersonState.Fleeing:
-				if (model.FleeTarget != Vector3.zero)
-				{
-					var fleeTarget = ValidateNavMeshPosition(model.FleeTarget);
-					if (fleeTarget.HasValue)
-					{
-						view.SetTargetDestination(fleeTarget.Value);
-					}
-				}
-
-				break;
+			OnPlayerDetected(detectedObject.Position);
+			break;
 		}
 	}
 
-	private Vector3? ValidateNavMeshPosition(Vector3 targetPosition)
+	#if UNITY_EDITOR
+	public float GetDetectionDistance()
 	{
-		if (NavMesh.SamplePosition(targetPosition, out var hit, 5f, NavMesh.AllAreas))
-		{
-			return hit.position;
-		}
-
-		return null;
+		return _detectionContext.DetectionDistance;
 	}
 
-	private void OnModelConsumed()
+	public float GetDetectionAngle()
 	{
+		return _detectionContext.DetectionAngle;
 	}
-
-	private void OnUpdate(float deltaTime)
-	{
-		model.ProcessMovement(deltaTime);
-
-		UpdateNavigationState();
-
-		ProcessPlayerDetection(deltaTime);
-	}
+	#endif
 }
 }

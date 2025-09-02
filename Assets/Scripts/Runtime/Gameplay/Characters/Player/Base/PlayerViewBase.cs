@@ -20,4 +20,3 @@ public abstract class PlayerViewBase : ViewMonoBehaviour<PlayerPresenterBase>, I
 	public abstract void SetPosition(Vector3 position);
 }
 }
-
