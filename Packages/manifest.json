@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.azzazello.bahaviourtree": "https://github.com/Azzazelloqq/BehaviourTree.git",
     "com.azzazello.config": "https://github.com/Azzazelloqq/Config.git",
     "com.azzazello.detectionservice": "https://github.com/Azzazelloqq/Detection-service.git",
     "com.azzazello.disposable": "https://github.com/Azzazelloqq/Disposable.git",

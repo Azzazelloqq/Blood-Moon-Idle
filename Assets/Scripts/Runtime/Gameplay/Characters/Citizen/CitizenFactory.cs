@@ -2,11 +2,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using LightDI.Runtime;
 using ResourceLoader;
-using Runtime.Gameplay.Characters.Person.Base;
+using Runtime.Gameplay.Characters.Citizen.Base;
 using Scripts.Generated.Addressables;
 using UnityEngine;
 
-namespace Runtime.Gameplay.Characters.Person
+namespace Runtime.Gameplay.Characters.Citizen
 {
 public class CitizenFactory
 {
@@ -36,10 +36,12 @@ public class CitizenFactory
 		var personView = Object.Instantiate(_viewPrefab, parent);
 		var personModel = new CitizenModel(3f, _detectionContext);
 
+		var behaviourControllerFactory = new CitizenBehaviourControllerFactory();
 		// Create presenter using auto-generated factory
 		var personPresenter = CitizenPresenterFactory.CreateCitizenPresenter(
 			personView,
 			personModel,
+			behaviourControllerFactory,
 			_detectionContext);
 
 		// Initialize

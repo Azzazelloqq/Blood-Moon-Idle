@@ -1,9 +1,10 @@
 using MVP;
 using Runtime.Core.Infrastructure.TransformUtils;
+using Runtime.Gameplay.AI.Citizen;
 using Runtime.Gameplay.Characters.Base;
 using UnityEngine;
 
-namespace Runtime.Gameplay.Characters.Person.Base
+namespace Runtime.Gameplay.Characters.Citizen.Base
 {
 public abstract class CitizenPresenterBase : Presenter<CitizenViewBase, CitizenModelBase>, ICharacter
 {

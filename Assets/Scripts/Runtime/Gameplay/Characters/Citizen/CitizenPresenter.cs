@@ -4,14 +4,15 @@ using System.Threading.Tasks;
 using Azzazelloqq.DetectionService.Source;
 using LightDI.Runtime;
 using Runtime.Core.Infrastructure.TransformUtils;
-using Runtime.Gameplay.Characters.Person.Base;
+using Runtime.Gameplay.AI.Citizen;
+using Runtime.Gameplay.Characters.Citizen.Base;
 using Runtime.Gameplay.Characters.Player;
 using TickHandler;
 using UnityEngine;
 using UnityEngine.AI;
 using Random = UnityEngine.Random;
 
-namespace Runtime.Gameplay.Characters.Person
+namespace Runtime.Gameplay.Characters.Citizen
 {
 public class CitizenPresenter : CitizenPresenterBase
 {
@@ -25,6 +26,7 @@ public class CitizenPresenter : CitizenPresenterBase
 	private readonly IDetectionService _detectionService;
 	private readonly PersonDetectionContext _detectionContext;
 	private readonly ITickHandler _tickHandler;
+	private readonly CitizenBehaviourController _behaviourController;
 	private float _lastDetectionCheck;
 
 	public CitizenPresenter(
@@ -32,11 +34,13 @@ public class CitizenPresenter : CitizenPresenterBase
 		CitizenModelBase model,
 		[Inject] IDetectionService detectionService,
 		[Inject] ITickHandler tickHandler,
+		ICitizenBehaviourControllerFactory behaviourControllerFactory,
 		PersonDetectionContext detectionContext) : base(view, model)
 	{
 		_detectionService = detectionService;
 		_tickHandler = tickHandler;
 		_detectionContext = detectionContext;
+		_behaviourController = behaviourControllerFactory.Create(this);
 	}
 
 	protected override void OnInitialize()
@@ -46,6 +50,9 @@ public class CitizenPresenter : CitizenPresenterBase
 		view.SetMoveSpeed(model.MovementSpeed);
 		_detectionService.RegisterObject(view);
 		_tickHandler.SubscribeOnFrameUpdate(OnUpdate);
+		
+		// Initialize behavior tree controller
+		_behaviourController.Initialize();
 	}
 
 	protected override ValueTask OnInitializeAsync(CancellationToken token)
@@ -55,6 +62,9 @@ public class CitizenPresenter : CitizenPresenterBase
 		view.SetMoveSpeed(model.MovementSpeed);
 		_detectionService.RegisterObject(view);
 		_tickHandler.SubscribeOnFrameUpdate(OnUpdate);
+		
+		// Initialize behavior tree controller
+		_behaviourController.Initialize();
 
 		return default;
 	}
@@ -64,6 +74,7 @@ public class CitizenPresenter : CitizenPresenterBase
 		_tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
 		_detectionService.UnregisterObject(view);
 		UnsubscribeOnModelEvents();
+		_behaviourController?.Dispose();
 	}
 
 	protected override ValueTask OnDisposeAsync(CancellationToken token)
@@ -71,6 +82,7 @@ public class CitizenPresenter : CitizenPresenterBase
 		_tickHandler.UnsubscribeOnFrameUpdate(OnUpdate);
 		_detectionService.UnregisterObject(view);
 		UnsubscribeOnModelEvents();
+		_behaviourController?.Dispose();
 
 		return default;
 	}
@@ -287,6 +299,10 @@ public class CitizenPresenter : CitizenPresenterBase
 	{
 		var oldPosition = model.Position;
 
+		// Use behavior tree for AI decisions
+		_behaviourController?.UpdateBehaviour();
+
+		// Still need model movement processing and navigation state updates
 		model.ProcessMovement(deltaTime, Time.time);
 		UpdateNavigationState();
 
@@ -296,12 +312,13 @@ public class CitizenPresenter : CitizenPresenterBase
 			_detectionService.UpdateObjectPosition(view, oldPosition);
 		}
 
-		ProcessPlayerDetection(deltaTime);
+		// Process player detection for behavior tree
+		ProcessPlayerDetectionForBehaviourTree(deltaTime);
 	}
 
-	private void ProcessPlayerDetection(float deltaTime)
+	private void ProcessPlayerDetectionForBehaviourTree(float deltaTime)
 	{
-		if (!model.CanMove() || model.CurrentState == PersonState.Fleeing)
+		if (!model.CanMove())
 		{
 			return;
 		}
@@ -326,6 +343,7 @@ public class CitizenPresenter : CitizenPresenterBase
 			detectionDistance,
 			obstacleLayerMask);
 
+		bool playerFound = false;
 		foreach (var detectedObject in detectedObjects)
 		{
 			if (detectedObject is not PlayerView)
@@ -333,9 +351,23 @@ public class CitizenPresenter : CitizenPresenterBase
 				continue;
 			}
 
-			OnPlayerDetected(detectedObject.Position);
+			// Update behavior controller with player detection
+			UpdateBehaviourControllerPlayerDetection(detectedObject.Position);
+			playerFound = true;
 			break;
 		}
+		
+		// Clear detection if no player found
+		if (!playerFound)
+		{
+			_behaviourController?.ClearPlayerDetection();
+		}
+	}
+
+	private void UpdateBehaviourControllerPlayerDetection(Vector3 playerPosition)
+	{
+		// Update the behavior controller's player detection state
+		_behaviourController?.UpdatePlayerDetection(playerPosition);
 	}
 
 	#if UNITY_EDITOR

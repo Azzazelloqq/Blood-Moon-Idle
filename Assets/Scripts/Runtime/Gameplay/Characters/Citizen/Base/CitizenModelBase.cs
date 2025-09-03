@@ -1,8 +1,9 @@
 using System;
 using MVP;
+using Runtime.Gameplay.AI.Citizen;
 using UnityEngine;
 
-namespace Runtime.Gameplay.Characters.Person.Base
+namespace Runtime.Gameplay.Characters.Citizen.Base
 {
 public abstract class CitizenModelBase : Model
 {
@@ -37,15 +38,5 @@ public abstract class CitizenModelBase : Model
 	public abstract void StartBeingFedOn();
 	public abstract void StopBeingFedOn();
 	public abstract void Kill();
-}
-
-public enum PersonState
-{
-	Idle,
-	Fleeing,
-	Consumed,
-	BeingFedOn,
-	Dying,
-	Dead,
 }
 }

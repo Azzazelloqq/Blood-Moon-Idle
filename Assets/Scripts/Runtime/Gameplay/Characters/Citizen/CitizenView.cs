@@ -2,11 +2,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Runtime.Core.Infrastructure.TransformUtils;
-using Runtime.Gameplay.Characters.Person.Base;
+using Runtime.Gameplay.AI.Citizen;
+using Runtime.Gameplay.Characters.Citizen.Base;
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Runtime.Gameplay.Characters.Person
+namespace Runtime.Gameplay.Characters.Citizen
 {
 public class CitizenView : CitizenViewBase
 {

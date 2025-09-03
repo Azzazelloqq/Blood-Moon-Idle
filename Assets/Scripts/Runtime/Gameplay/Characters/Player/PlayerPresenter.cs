@@ -6,7 +6,6 @@ using LightDI.Runtime;
 using Runtime.Core.Architecture.Input;
 using Runtime.Core.Infrastructure.Config.Local.PlayerConfig;
 using Runtime.Core.Infrastructure.TransformUtils;
-using Runtime.Gameplay.Characters.Person.Base;
 using Runtime.Gameplay.Characters.Player.Base;
 using TickHandler;
 using UnityEngine;

@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.azzazello.bahaviourtree": {
+      "version": "https://github.com/Azzazelloqq/BehaviourTree.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "273e73167ae7b18ff84f81930dbad191f47645d0"
+    },
     "com.azzazello.config": {
       "version": "https://github.com/Azzazelloqq/Config.git",
       "depth": 0,

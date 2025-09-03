@@ -1,10 +1,11 @@
 using Azzazelloqq.DetectionService.Source;
 using MVP;
 using Runtime.Core.Infrastructure.TransformUtils;
+using Runtime.Gameplay.AI.Citizen;
 using Runtime.Gameplay.Characters.Player;
 using UnityEngine;
 
-namespace Runtime.Gameplay.Characters.Person.Base
+namespace Runtime.Gameplay.Characters.Citizen.Base
 {
 public abstract class CitizenViewBase : ViewMonoBehaviour<CitizenPresenterBase>, IDetectable, IKillableByPlayer
 {

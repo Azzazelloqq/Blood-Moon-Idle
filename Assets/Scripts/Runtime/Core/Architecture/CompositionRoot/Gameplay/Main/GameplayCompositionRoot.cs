@@ -16,7 +16,6 @@ using Runtime.Core.Infrastructure.Config.Local.DayNightConfig;
 using Runtime.Core.Infrastructure.Services.CameraService;
 using Runtime.Core.Infrastructure.Services.DayNightCycleService;
 using Runtime.Core.Infrastructure.Services.MovementService;
-
 using Runtime.Core.Infrastructure.TransformUtils;
 using Runtime.Gameplay.Camera;
 using Runtime.Gameplay.Camera.FollowCamera;

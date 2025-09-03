@@ -54,7 +54,7 @@ public class CityComposition : ICompositionRoot, IPreloadable, ICacheable
 		_cameraService = cameraService;
 		_logger = logger;
 
-		_сitizenSpawnService = СitizenSpawnServiceFactory.CreateСitizenSpawnService();
+		_сitizenSpawnService = CitizenSpawnServiceFactory.CreateCitizenSpawnService();
 	}
 
 	public void Initialize()

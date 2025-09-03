@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Runtime.Gameplay.Characters.Person
+namespace Runtime.Gameplay.Characters.Citizen
 {
 public readonly struct PersonDetectionContext
 {

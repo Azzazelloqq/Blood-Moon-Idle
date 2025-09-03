@@ -7,14 +7,14 @@ using InGameLogger;
 using LightDI.Runtime;
 using Runtime.Core.Infrastructure.Services.CameraService;
 using Runtime.Gameplay.Characters.Base;
-using Runtime.Gameplay.Characters.Person;
+using Runtime.Gameplay.Characters.Citizen;
 using Runtime.Gameplay.Characters.Player;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Runtime.Core.Infrastructure.Services.PeopleSpawnService
 {
-public class СitizenSpawnService : IСitizenSpawnService
+public class CitizenSpawnService : IСitizenSpawnService
 {
 	public event Action<ICharacter> OnCharacterSpawned;
 	public event Action<ICharacter> OnCharacterConsumed;
@@ -35,7 +35,7 @@ public class СitizenSpawnService : IСitizenSpawnService
 	private List<Task> _reusableTaskList;
 	private readonly PersonDetectionContext _detectionContextTest;
 	
-	public СitizenSpawnService(
+	public CitizenSpawnService(
 		[Inject] ICameraService cameraService,
 		[Inject] IInGameLogger logger,
 		[Inject] PlayerFactory playerFactory)

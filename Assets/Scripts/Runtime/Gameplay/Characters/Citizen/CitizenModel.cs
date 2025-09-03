@@ -1,11 +1,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Runtime.Gameplay.Characters.Person.Base;
+using Runtime.Gameplay.AI.Citizen;
+using Runtime.Gameplay.Characters.Citizen.Base;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Runtime.Gameplay.Characters.Person
+namespace Runtime.Gameplay.Characters.Citizen
 {
 public class CitizenModel : CitizenModelBase
 {
@@ -105,11 +106,13 @@ public class CitizenModel : CitizenModelBase
 	private void ProcessIdleWandering(float deltaTime, float currentTime)
 	{
 		// Check if it's time to wander to a new location
-		if (currentTime >= _nextWanderTime)
+		if (currentTime < _nextWanderTime)
 		{
-			RequestNewWanderTarget();
-			_nextWanderTime = currentTime + _aiNavigationContext.WanderInterval;
+			return;
 		}
+
+		RequestNewWanderTarget();
+		_nextWanderTime = currentTime + _aiNavigationContext.WanderInterval;
 	}
 
 	private void RequestNewWanderTarget()
